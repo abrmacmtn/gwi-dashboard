@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GWI Customer Analytics Dashboard</title>
+    <style>
+        :root {
+            --color-bg-base: #0f172a;
+            --color-bg-surface: #1e293b;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-primary: #38bdf8;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-bg-base);
+            color: var(--color-text-primary);
+            padding: 1rem;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 2rem;
+            }
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+            .subtitle {
+                font-size: 0.95rem;
+            }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 480px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        .metric-card {
+            background: var(--color-bg-surface);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .metric-card {
+                padding: 1.5rem;
+            }
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        @media (min-width: 768px) {
+            .metric-value {
+                font-size: 2rem;
+            }
+        }
+
+        .metric-subtext {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .controls {
+            background: var(--color-bg-surface);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .controls {
+                padding: 1.5rem;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        @media (min-width: 768px) {
+            .control-group {
+                flex: 0 1 auto;
+            }
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+
+        select, input {
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            background: var(--color-bg-base);
+            color: var(--color-text-primary);
+            font-size: 0.9rem;
+            width: 100%;
+            min-width: 0;
+        }
+
+        @media (min-width: 768px) {
+            select, input {
+                width: auto;
+            }
+        }
+
+        select:focus, input:focus {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+
+        .table-container {
+            background: var(--color-bg-surface);
+            border-radius: 8px;
+            overflow-x: auto;
+            overflow-y: visible;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        @media (min-width: 1024px) {
+            table {
+                min-width: 100%;
+            }
+        }
+
+        thead {
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        th {
+            padding: 0.75rem 0.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-primary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            th {
+                padding: 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        th:hover {
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        td {
+            padding: 0.75rem 0.5rem;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            font-size: 0.85rem;
+        }
+
+        @media (min-width: 768px) {
+            td {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+        }
+
+        tbody tr:hover {
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .penetration-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 6px;
+            background: rgba(56, 189, 248, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--color-primary);
+            transition: width 0.3s ease;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-owned {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--color-success);
+        }
+
+        .badge-contracted {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--color-warning);
+        }
+
+        .badge-clec {
+            background: rgba(56, 189, 248, 0.2);
+            color: var(--color-primary);
+        }
+
+        .export-btn {
+            padding: 0.5rem 1rem;
+            background: var(--color-primary);
+            color: var(--color-bg-base);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .export-btn {
+                width: auto;
+            }
+        }
+
+        .export-btn:hover {
+            background: #0ea5e9;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>GWI Customer Analytics Dashboard</h1>
+        <p class="subtitle">Real-time customer metrics across 24 networks | Updated: Feb 3, 2026</p>
+    </div>
+
+    <div class="metrics-grid" id="metricsGrid"></div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="networkTypeFilter">Network Type</label>
+            <select id="networkTypeFilter">
+                <option value="">All Types</option>
+                <option value="Owned FTTP">Owned FTTP</option>
+                <option value="Contracted">Contracted</option>
+                <option value="CLEC">CLEC</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="customerTypeFilter">Customer Type</label>
+            <select id="customerTypeFilter">
+                <option value="">All Customers</option>
+                <option value="Owned Customer">Owned Customer</option>
+                <option value="Contracted Customer">Contracted Customer</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="searchFilter">Search Network</label>
+            <input type="text" id="searchFilter" placeholder="Type to search...">
+        </div>
+        <div class="control-group">
+            <label>&nbsp;</label>
+            <button class="export-btn" onclick="exportToCSV()">Export to CSV</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Network</th>
+                    <th onclick="sortTable(1)">Type</th>
+                    <th onclick="sortTable(2)">Customer Type</th>
+                    <th onclick="sortTable(3)">Passings</th>
+                    <th onclick="sortTable(4)">Subscriptions</th>
+                    <th onclick="sortTable(5)">Penetration</th>
+                    <th onclick="sortTable(6)">ARPU</th>
+                    <th onclick="sortTable(7)">MRR</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const customerData = [
+            {network: "DVFiber", networkType: "Contracted", customerType: "Contracted Customer", passings: 3235, subscriptions: 1267, arpu: 100},
+            {network: "GWI - Copper", networkType: "CLEC", customerType: "Owned Customer", passings: 871, subscriptions: 871, arpu: 329},
+            {network: "LymeFiber", networkType: "Contracted", customerType: "Contracted Customer", passings: 1325, subscriptions: 662, arpu: null},
+            {network: "GWI - Standard", networkType: "CLEC", customerType: "Owned Customer", passings: 533, subscriptions: 533, arpu: 519},
+            {network: "Islesboro Municipal Broadband", networkType: "Contracted", customerType: "Contracted Customer", passings: 948, subscriptions: 280, arpu: 127},
+            {network: "Northport 1", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 424, subscriptions: 242, arpu: 79},
+            {network: "Northport 2", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 976, subscriptions: 228, arpu: 81},
+            {network: "MFC - 3 Ring Binder (3RB)", networkType: "CLEC", customerType: "Owned Customer", passings: 223, subscriptions: 223, arpu: 311},
+            {network: "GWI - MDU/MTU", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 136, subscriptions: 136, arpu: 240},
+            {network: "SanfordNet - FttP", networkType: "Contracted", customerType: "Owned Customer", passings: 91, subscriptions: 91, arpu: 637},
+            {network: "The Lincoln Lofts (MDU)", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 148, subscriptions: 69, arpu: 106},
+            {network: "South Portland", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 360, subscriptions: 48, arpu: 123},
+            {network: "Saco Mill #4 (MDU)", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 150, subscriptions: 44, arpu: 67},
+            {network: "GWI - FttP", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 40, subscriptions: 40, arpu: 376},
+            {network: "Rockport", networkType: "Contracted", customerType: "Owned Customer", passings: 33, subscriptions: 33, arpu: 184},
+            {network: "Brunswick (FTTX Columbia)", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 222, subscriptions: 30, arpu: 74},
+            {network: "Sumner", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 504, subscriptions: 30, arpu: 52},
+            {network: "The Eleven (MDU)", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 76, subscriptions: 20, arpu: 81},
+            {network: "FTTX Knightville", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 15, subscriptions: 15, arpu: 76},
+            {network: "Ellsworth - FttP", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 8, subscriptions: 8, arpu: 422},
+            {network: "3RB Enterprise", networkType: "CLEC", customerType: "Owned Customer", passings: 7, subscriptions: 7, arpu: 311},
+            {network: "Thornton Heights (MDU)", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 42, subscriptions: 2, arpu: 91},
+            {network: "Belmont/Morril", networkType: "Owned FTTP", customerType: "Owned Customer", passings: 784, subscriptions: 0, arpu: null},
+            {network: "NWFX", networkType: "Contracted", customerType: "Contracted Customer", passings: 3405, subscriptions: 0, arpu: null}
+        ];
+
+        let currentData = [...customerData];
+        let sortDirection = {};
+
+        function calculateMetrics(data) {
+            const totalPassings = data.reduce((sum, row) => sum + row.passings, 0);
+            const totalSubs = data.reduce((sum, row) => sum + row.subscriptions, 0);
+            const totalMRR = data.reduce((sum, row) => sum + (row.subscriptions * (row.arpu || 0)), 0);
+            const avgARPU = totalMRR / totalSubs;
+            const penetration = (totalSubs / totalPassings * 100);
+
+            return {
+                totalPassings,
+                totalSubs,
+                totalMRR,
+                avgARPU,
+                penetration
+            };
+        }
+
+        function renderMetrics(data) {
+            const metrics = calculateMetrics(data);
+            const metricsGrid = document.getElementById('metricsGrid');
+            
+            metricsGrid.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-label">Total Subscriptions</div>
+                    <div class="metric-value">${metrics.totalSubs.toLocaleString()}</div>
+                    <div class="metric-subtext">Active Customers</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Passings</div>
+                    <div class="metric-value">${metrics.totalPassings.toLocaleString()}</div>
+                    <div class="metric-subtext">Homes/Businesses</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Penetration Rate</div>
+                    <div class="metric-value">${metrics.penetration.toFixed(1)}%</div>
+                    <div class="metric-subtext">Subs / Passings</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Avg ARPU</div>
+                    <div class="metric-value">$${metrics.avgARPU.toFixed(0)}</div>
+                    <div class="metric-subtext">Per Customer/Month</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total MRR</div>
+                    <div class="metric-value">$${(metrics.totalMRR / 1000).toFixed(0)}K</div>
+                    <div class="metric-subtext">Monthly Recurring Revenue</div>
+                </div>
+            `;
+        }
+
+        function getNetworkTypeBadge(type) {
+            if (type === "Owned FTTP") return '<span class="badge badge-owned">Owned FTTP</span>';
+            if (type === "Contracted") return '<span class="badge badge-contracted">Contracted</span>';
+            if (type === "CLEC") return '<span class="badge badge-clec">CLEC</span>';
+            return type;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-data">No matching networks found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(row => {
+                const penetration = row.passings > 0 ? (row.subscriptions / row.passings * 100) : 0;
+                const mrr = row.subscriptions * (row.arpu || 0);
+                
+                return `
+                    <tr>
+                        <td><strong>${row.network}</strong></td>
+                        <td>${getNetworkTypeBadge(row.networkType)}</td>
+                        <td>${row.customerType}</td>
+                        <td>${row.passings.toLocaleString()}</td>
+                        <td><strong>${row.subscriptions.toLocaleString()}</strong></td>
+                        <td>
+                            <div class="penetration-bar">
+                                <div class="bar-container">
+                                    <div class="bar-fill" style="width: ${penetration}%"></div>
+                                </div>
+                                <span>${penetration.toFixed(1)}%</span>
+                            </div>
+                        </td>
+                        <td>${row.arpu ? '$' + row.arpu.toFixed(0) : 'N/A'}</td>
+                        <td>$${mrr.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function applyFilters() {
+            const networkType = document.getElementById('networkTypeFilter').value;
+            const customerType = document.getElementById('customerTypeFilter').value;
+            const search = document.getElementById('searchFilter').value.toLowerCase();
+
+            currentData = customerData.filter(row => {
+                const matchesNetworkType = !networkType || row.networkType === networkType;
+                const matchesCustomerType = !customerType || row.customerType === customerType;
+                const matchesSearch = !search || row.network.toLowerCase().includes(search);
+                
+                return matchesNetworkType && matchesCustomerType && matchesSearch;
+            });
+
+            renderMetrics(currentData);
+            renderTable(currentData);
+        }
+
+        function sortTable(columnIndex) {
+            const key = ['network', 'networkType', 'customerType', 'passings', 'subscriptions', 'penetration', 'arpu', 'mrr'][columnIndex];
+            
+            if (!sortDirection[key]) sortDirection[key] = 'asc';
+            sortDirection[key] = sortDirection[key] === 'asc' ? 'desc' : 'asc';
+
+            currentData.sort((a, b) => {
+                let valA, valB;
+                
+                if (key === 'penetration') {
+                    valA = a.passings > 0 ? (a.subscriptions / a.passings) : 0;
+                    valB = b.passings > 0 ? (b.subscriptions / b.passings) : 0;
+                } else if (key === 'mrr') {
+                    valA = a.subscriptions * (a.arpu || 0);
+                    valB = b.subscriptions * (b.arpu || 0);
+                } else {
+                    valA = a[key];
+                    valB = b[key];
+                }
+
+                if (valA === null || valA === undefined) return 1;
+                if (valB === null || valB === undefined) return -1;
+                
+                if (typeof valA === 'string') {
+                    return sortDirection[key] === 'asc' 
+                        ? valA.localeCompare(valB)
+                        : valB.localeCompare(valA);
+                }
+                
+                return sortDirection[key] === 'asc' ? valA - valB : valB - valA;
+            });
+
+            renderTable(currentData);
+        }
+
+        function exportToCSV() {
+            const headers = ['Network', 'Network Type', 'Customer Type', 'Passings', 'Subscriptions', 'Penetration %', 'ARPU', 'MRR'];
+            const rows = currentData.map(row => {
+                const penetration = row.passings > 0 ? (row.subscriptions / row.passings * 100).toFixed(1) : '0.0';
+                const mrr = row.subscriptions * (row.arpu || 0);
+                return [
+                    row.network,
+                    row.networkType,
+                    row.customerType,
+                    row.passings,
+                    row.subscriptions,
+                    penetration,
+                    row.arpu || '',
+                    mrr.toFixed(2)
+                ];
+            });
+
+            const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gwi-customer-data-' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+        }
+
+        document.getElementById('networkTypeFilter').addEventListener('change', applyFilters);
+        document.getElementById('customerTypeFilter').addEventListener('change', applyFilters);
+        document.getElementById('searchFilter').addEventListener('input', applyFilters);
+
+        // Initial render
+        renderMetrics(currentData);
+        renderTable(currentData);
+    </script>
+</body>
+</html>
